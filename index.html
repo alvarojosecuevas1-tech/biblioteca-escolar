@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+    content="Sistema Biblioteca Escolar">
+
+    <title>Biblioteca Escolar Online</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+
+        :root{
+
+            --bs-primary:#2c3e50;
+            --bs-primary-dark:#1a252f;
+            --bs-secondary:#e74c3c;
+            --bs-success:#27ae60;
+            --bs-info:#3498db;
+            --bs-warning:#f39c12;
+
+            --bs-body-font-family:'Segoe UI','Poppins',sans-serif;
+        }
+
+        body{
+            background:#f4f6f9;
+            font-family:var(--bs-body-font-family);
+        }
+
+        .navbar{
+            background:var(--bs-primary);
+        }
+
+        .navbar-brand{
+            color:white !important;
+            font-weight:bold;
+        }
+
+        .hero{
+            background:linear-gradient(
+                135deg,
+                #2c3e50,
+                #34495e
+            );
+
+            color:white;
+
+            padding:70px 20px;
+
+            text-align:center;
+
+            border-radius:0 0 30px 30px;
+        }
+
+        .hero h1{
+            font-size:3rem;
+            font-weight:bold;
+        }
+
+        .card{
+            border:none;
+            border-radius:15px;
+            transition:0.3s;
+            animation:fadeIn 0.5s ease;
+        }
+
+        .card:hover{
+            transform:translateY(-5px);
+            box-shadow:0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary{
+            background:var(--bs-primary);
+            border:none;
+        }
+
+        .btn-primary:hover{
+            background:var(--bs-primary-dark);
+        }
+
+        .badge-disponible{
+            background:#27ae60;
+        }
+
+        .badge-prestado{
+            background:#c0392b;
+        }
+
+        footer{
+            background:#2c3e50;
+            color:white;
+            padding:20px;
+            margin-top:50px;
+            text-align:center;
+        }
+
+        @keyframes fadeIn{
+
+            from{
+                opacity:0;
+                transform:translateY(20px);
+            }
+
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar navbar-expand-lg">
+
+        <div class="container">
+
+            <a class="navbar-brand" href="#">
+                📚 Biblioteca Escolar
+            </a>
+
+        </div>
+
+    </nav>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="container">
+
+            <h1>
+                Sistema Web Biblioteca Escolar
+            </h1>
+
+            <p class="lead mt-3">
+                Accede desde cualquier lugar del mundo
+            </p>
+
+            <button class="btn btn-light btn-lg mt-3"
+            data-bs-toggle="modal"
+            data-bs-target="#modalInfo">
+
+                Ver Información
+
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- CONTENIDO -->
+
+    <div class="container mt-5">
+
+        <!-- FILTROS -->
+
+        <div class="card p-4 mb-4">
+
+            <h3 class="mb-4">
+                🔎 Filtros Avanzados
+            </h3>
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Buscar libro
+                    </label>
+
+                    <input type="text"
+                    id="searchFilter"
+                    class="form-control"
+                    placeholder="Buscar por título o autor">
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Disponibilidad
+                    </label>
+
+                    <select id="availabilityFilter"
+                    class="form-select">
+
+                        <option value="all">Todos</option>
+                        <option value="available">Disponibles</option>
+                        <option value="borrowed">Prestados</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Año
+                    </label>
+
+                    <div class="input-group">
+
+                        <input type="number"
+                        id="yearMin"
+                        class="form-control"
+                        placeholder="Desde">
+
+                        <span class="input-group-text">
+                            a
+                        </span>
+
+                        <input type="number"
+                        id="yearMax"
+                        class="form-control"
+                        placeholder="Hasta">
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+
+                    <button class="btn btn-secondary w-100"
+                    onclick="limpiarFiltros()">
+
+                        Limpiar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CONTADOR -->
+
+        <h5 id="contadorResultados"
+        class="mb-4"></h5>
+
+        <!-- LIBROS -->
+
+        <div class="row"
+        id="contenedorLibros"></div>
+
+        <!-- GRAFICO -->
+
+        <div class="card p-4 mt-5">
+
+            <h3 class="mb-4">
+                📊 Estadísticas
+            </h3>
+
+            <canvas id="graficoLibros"></canvas>
+
+            <div id="statsSummary"></div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL -->
+
+    <div class="modal fade"
+    id="modalInfo"
+    tabindex="-1">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Información del Sistema
+                    </h5>
+
+                    <button class="btn-close"
+                    data-bs-dismiss="modal"></button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <p>
+                        Este sistema fue publicado utilizando GitHub Pages.
+                    </p>
+
+                    <p>
+                        Los estudiantes y profesores pueden acceder desde cualquier lugar.
+                    </p>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                        Cerrar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            © 2026 Biblioteca Escolar
+        </p>
+
+        <p>
+            Hosting gratuito con GitHub Pages
+        </p>
+
+    </footer>
+
+    <!-- CHART.JS -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- BOOTSTRAP JS -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+        const libros = [
+
+            {
+                titulo:"Cien Años de Soledad",
+                autor:"Gabriel García Márquez",
+                anio:1967,
+                disponible:true
+            },
+
+            {
+                titulo:"Don Quijote",
+                autor:"Miguel de Cervantes",
+                anio:1605,
+                disponible:false
+            },
+
+            {
+                titulo:"El Principito",
+                autor:"Antoine de Saint-Exupéry",
+                anio:1943,
+                disponible:true
+            },
+
+            {
+                titulo:"Harry Potter",
+                autor:"J.K Rowling",
+                anio:1997,
+                disponible:false
+            },
+
+            {
+                titulo:"Clean Code",
+                autor:"Robert Martin",
+                anio:2008,
+                disponible:true
+            }
+
+        ];
+
+        function renderizarLibros(lista){
+
+            const contenedor =
+            document.getElementById(
+                'contenedorLibros'
+            );
+
+            contenedor.innerHTML = '';
+
+            lista.forEach(libro=>{
+
+                contenedor.innerHTML += `
+
+                    <div class="col-md-4 mb-4">
+
+                        <div class="card h-100">
+
+                            <div class="card-body">
+
+                                <h5 class="card-title">
+
+                                    ${libro.titulo}
+
+                                </h5>
+
+                                <p>
+
+                                    <strong>Autor:</strong>
+                                    ${libro.autor}
+
+                                </p>
+
+                                <p>
+
+                                    <strong>Año:</strong>
+                                    ${libro.anio}
+
+                                </p>
+
+                                <span class="badge ${
+                                    libro.disponible
+                                    ? 'badge-disponible'
+                                    : 'badge-prestado'
+                                }">
+
+                                    ${
+                                        libro.disponible
+                                        ? 'Disponible'
+                                        : 'Prestado'
+                                    }
+
+                                </span>
+
+                                <hr>
+
+                                <button
+                                class="btn btn-info btn-sm"
+
+                                data-bs-toggle="tooltip"
+
+                                title="Información rápida del libro">
+
+                                    ℹ️ Info
+
+                                </button>
+
+                                <button
+                                class="btn btn-secondary btn-sm"
+
+                                data-bs-toggle="popover"
+
+                                data-bs-content="Libro registrado en el sistema web">
+
+                                    📌 Nota
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+            actualizarContador(lista.length);
+
+            inicializarBootstrap();
+
+        }
+
+        function inicializarBootstrap(){
+
+            const tooltipTriggerList =
+            [].slice.call(
+                document.querySelectorAll(
+                    '[data-bs-toggle="tooltip"]'
+                )
+            );
+
+            tooltipTriggerList.map(el=>{
+
+                return new bootstrap.Tooltip(el);
+
+            });
+
+            const popoverTriggerList =
+            [].slice.call(
+                document.querySelectorAll(
+                    '[data-bs-toggle="popover"]'
+                )
+            );
+
+            popoverTriggerList.map(el=>{
+
+                return new bootstrap.Popover(el);
+
+            });
+
+        }
+
+        function aplicarFiltros(){
+
+            const texto =
+            document.getElementById(
+                'searchFilter'
+            ).value.toLowerCase();
+
+            const disponibilidad =
+            document.getElementById(
+                'availabilityFilter'
+            ).value;
+
+            const yearMin =
+            parseInt(
+                document.getElementById(
+                    'yearMin'
+                ).value
+            ) || 0;
+
+            const yearMax =
+            parseInt(
+                document.getElementById(
+                    'yearMax'
+                ).value
+            ) || 9999;
+
+            const filtrados =
+            libros.filter(libro=>{
+
+                const coincideTexto =
+
+                libro.titulo.toLowerCase()
+                .includes(texto)
+
+                ||
+
+                libro.autor.toLowerCase()
+                .includes(texto);
+
+                let coincideDisponibilidad = true;
+
+                if(disponibilidad === 'available'){
+
+                    coincideDisponibilidad =
+                    libro.disponible;
+
+                }
+
+                if(disponibilidad === 'borrowed'){
+
+                    coincideDisponibilidad =
+                    !libro.disponible;
+
+                }
+
+                const coincideAnio =
+
+                libro.anio >= yearMin
+
+                &&
+
+                libro.anio <= yearMax;
+
+                return coincideTexto
+                &&
+                coincideDisponibilidad
+                &&
+                coincideAnio;
+
+            });
+
+            renderizarLibros(filtrados);
+
+        }
+
+        function limpiarFiltros(){
+
+            document.getElementById(
+                'searchFilter'
+            ).value = '';
+
+            document.getElementById(
+                'availabilityFilter'
+            ).value = 'all';
+
+            document.getElementById(
+                'yearMin'
+            ).value = '';
+
+            document.getElementById(
+                'yearMax'
+            ).value = '';
+
+            renderizarLibros(libros);
+
+        }
+
+        function actualizarContador(total){
+
+            document.getElementById(
+                'contadorResultados'
+            ).textContent =
+
+            `Mostrando ${total} de ${libros.length} libros`;
+
+        }
+
+        document.getElementById(
+            'searchFilter'
+        ).addEventListener(
+            'input',
+            aplicarFiltros
+        );
+
+        document.getElementById(
+            'availabilityFilter'
+        ).addEventListener(
+            'change',
+            aplicarFiltros
+        );
+
+        document.getElementById(
+            'yearMin'
+        ).addEventListener(
+            'input',
+            aplicarFiltros
+        );
+
+        document.getElementById(
+            'yearMax'
+        ).addEventListener(
+            'input',
+            aplicarFiltros
+        );
+
+        function generarGrafico(){
+
+            const disponibles =
+            libros.filter(
+                l=>l.disponible
+            ).length;
+
+            const prestados =
+            libros.length - disponibles;
+
+            const ctx =
+            document.getElementById(
+                'graficoLibros'
+            );
+
+            new Chart(ctx,{
+
+                type:'pie',
+
+                data:{
+
+                    labels:[
+                        'Disponibles',
+                        'Prestados'
+                    ],
+
+                    datasets:[{
+
+                        data:[
+                            disponibles,
+                            prestados
+                        ],
+
+                        backgroundColor:[
+                            '#27ae60',
+                            '#c0392b'
+                        ]
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    plugins:{
+
+                        title:{
+                            display:true,
+                            text:'Estado de Libros'
+                        }
+
+                    }
+
+                }
+
+            });
+
+            document.getElementById(
+                'statsSummary'
+            ).innerHTML = `
+
+                <div class="row text-center mt-4">
+
+                    <div class="col-md-4">
+
+                        <div class="card bg-info text-white">
+
+                            <div class="card-body">
+
+                                <h3>${libros.length}</h3>
+
+                                <p>Total Libros</p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card bg-success text-white">
+
+                            <div class="card-body">
+
+                                <h3>${disponibles}</h3>
+
+                                <p>Disponibles</p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card bg-danger text-white">
+
+                            <div class="card-body">
+
+                                <h3>${prestados}</h3>
+
+                                <p>Prestados</p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+        renderizarLibros(libros);
+
+        generarGrafico();
+
+    </script>
+
+</body>
+
+</html>
